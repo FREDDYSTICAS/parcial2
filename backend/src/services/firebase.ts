@@ -124,6 +124,23 @@ export const initializeDatabase = async () => {
   const fs = initializeFirebase();
   // Asegurar índices manuales: en Firestore se crean compuestos desde consola según consultas
   console.log('✅ Firebase Firestore inicializado');
+
+  // Seeding automático si no existen usuarios
+  try {
+    const usersSnap = await fs.collection(collectionName)
+      .where('type', '==', 'usuario')
+      .limit(1)
+      .get();
+    if (usersSnap.empty) {
+      console.log('🌱 No hay usuarios, ejecutando seeding inicial...');
+      const { seedDatabase } = await import('../scripts/seedData');
+      await seedDatabase();
+    } else {
+      console.log('ℹ️ Datos existentes detectados, seeding omitido');
+    }
+  } catch (err) {
+    console.warn('⚠️ No se pudo verificar/sembrar datos iniciales:', (err as any)?.message);
+  }
 };
 
 
