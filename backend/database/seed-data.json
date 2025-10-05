@@ -1,0 +1,116 @@
+{
+  "empleados": [
+    {
+      "_id": "emp_1",
+      "type": "empleado",
+      "nro_documento": "12345678",
+      "nombre": "Freddy",
+      "apellido": "Stiven",
+      "edad": 30,
+      "genero": "Masculino",
+      "cargo": "Administrador del Sistema",
+      "correo": "cfreddystiven@gmail.com",
+      "nro_contacto": "3001234567",
+      "estado": "activo",
+      "observaciones": [],
+      "fecha_creacion": "2024-01-01T08:00:00Z",
+      "fecha_actualizacion": "2024-01-01T08:00:00Z"
+    },
+    {
+      "_id": "emp_2",
+      "type": "empleado",
+      "nro_documento": "87654321",
+      "nombre": "María",
+      "apellido": "González",
+      "edad": 28,
+      "genero": "Femenino",
+      "cargo": "Supervisora de Producción",
+      "correo": "maria.gonzalez@molino.com",
+      "nro_contacto": "3007654321",
+      "estado": "activo",
+      "observaciones": [],
+      "fecha_creacion": "2024-02-01T08:00:00Z",
+      "fecha_actualizacion": "2024-02-01T08:00:00Z"
+    },
+    {
+      "_id": "emp_3",
+      "type": "empleado",
+      "nro_documento": "11223344",
+      "nombre": "Carlos",
+      "apellido": "Rodríguez",
+      "edad": 42,
+      "genero": "Masculino",
+      "cargo": "Operador de Molino",
+      "correo": "carlos.rodriguez@molino.com",
+      "nro_contacto": "3001122334",
+      "estado": "activo",
+      "observaciones": [
+        {
+          "fecha": "2024-01-15T10:30:00Z",
+          "tipo": "felicitacion",
+          "descripcion": "Excelente desempeño en el mantenimiento del molino",
+          "autor": "Supervisor"
+        }
+      ],
+      "fecha_creacion": "2024-01-15T08:00:00Z",
+      "fecha_actualizacion": "2024-01-15T08:00:00Z"
+    }
+  ],
+  "contratos": [
+    {
+      "_id": "cont_1",
+      "type": "contrato",
+      "empleado_id": "emp_1",
+      "empleado_nombre": "Freddy Stiven",
+      "empleado_documento": "12345678",
+      "fecha_inicio": "2024-01-01",
+      "fecha_fin": "2024-12-31",
+      "valor_contrato": 8000000,
+      "cargo": "Administrador del Sistema",
+      "tipo_contrato": "indefinido",
+      "estado": "activo",
+      "fecha_creacion": "2024-01-01T08:00:00Z"
+    },
+    {
+      "_id": "cont_2",
+      "type": "contrato",
+      "empleado_id": "emp_2",
+      "empleado_nombre": "María González",
+      "empleado_documento": "87654321",
+      "fecha_inicio": "2024-02-01",
+      "fecha_fin": "2024-12-31",
+      "valor_contrato": 5000000,
+      "cargo": "Supervisora de Producción",
+      "tipo_contrato": "indefinido",
+      "estado": "activo",
+      "fecha_creacion": "2024-02-01T08:00:00Z"
+    },
+    {
+      "_id": "cont_3",
+      "type": "contrato",
+      "empleado_id": "emp_3",
+      "empleado_nombre": "Carlos Rodríguez",
+      "empleado_documento": "11223344",
+      "fecha_inicio": "2024-01-15",
+      "fecha_fin": "2024-12-31",
+      "valor_contrato": 3200000,
+      "cargo": "Operador de Molino",
+      "tipo_contrato": "indefinido",
+      "estado": "activo",
+      "fecha_creacion": "2024-01-15T08:00:00Z"
+    }
+  ],
+  "usuarios": [
+    {
+      "_id": "user_admin",
+      "type": "usuario",
+      "username": "admin",
+      "email": "cfreddystiven@gmail.com",
+      "password_hash": "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KzKzq2",
+      "rol": "administrador",
+      "empleado_id": "emp_1",
+      "activo": true,
+      "fecha_creacion": "2024-01-01T08:00:00Z"
+    }
+  ]
+}
