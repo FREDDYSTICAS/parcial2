@@ -26,8 +26,9 @@ const transporter = !EMAIL_DISABLED && SMTP_USER && SMTP_PASS
     })
   : null;
 
-// Verificar configuración de email si hay transporter
-if (transporter) {
+// Verificar configuración de email si hay transporter y está habilitado explícitamente
+const VERIFY_ON_BOOT = (process.env.SMTP_VERIFY_ON_BOOT || 'false').toLowerCase() === 'true';
+if (transporter && VERIFY_ON_BOOT) {
   transporter.verify((error: any) => {
     if (error) {
       console.error('❌ Error configurando email:', error);
