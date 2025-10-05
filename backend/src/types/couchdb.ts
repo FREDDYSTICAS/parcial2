@@ -13,6 +13,7 @@ export interface Empleado extends BaseDocument {
   nro_documento: string;
   nombre: string;
   apellido: string;
+  nombre_apellido?: string; // Campo derivado para búsquedas y ordenación
   edad: number;
   genero: 'Masculino' | 'Femenino' | 'Otro';
   cargo: string;
