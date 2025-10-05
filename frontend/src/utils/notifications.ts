@@ -114,12 +114,12 @@ export const notifications = NotificationManager.getInstance();
 
 // Utilidades para manejo de errores de API
 export const handleApiError = (error: any): string => {
-  if (error.response?.data?.message) {
-    return error.response.data.message;
+  if ((error as any)?.response?.data?.message) {
+    return (error as any).response.data.message;
   }
   
-  if (error.response?.data?.error) {
-    return error.response.data.error;
+  if ((error as any)?.response?.data?.error) {
+    return (error as any).response.data.error;
   }
   
   if (error.message) {

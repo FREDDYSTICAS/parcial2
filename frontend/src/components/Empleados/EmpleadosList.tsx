@@ -74,7 +74,7 @@ const EmpleadosList: React.FC = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('❌ Error descargando PDF:', error);
-      console.error('❌ Detalles del error:', error.response?.data);
+      console.error('❌ Detalles del error:', (error as any)?.response?.data);
     } finally {
       setIsGenerating(null);
     }
@@ -102,7 +102,7 @@ const EmpleadosList: React.FC = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('❌ Error descargando Excel:', error);
-      console.error('❌ Detalles del error:', error.response?.data);
+      console.error('❌ Detalles del error:', (error as any)?.response?.data);
     } finally {
       setIsGenerating(null);
     }
