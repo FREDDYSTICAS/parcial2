@@ -217,7 +217,7 @@ export const seedDatabase = async () => {
       _id: 'user_admin',
       type: 'usuario',
       username: 'cfreddystiven',
-      email: 'cfreddystivengmail.com',
+      email: 'cfreddystiven@gmail.com',
       password_hash: adminPassword,
       rol: 'administrador',
       empleado_id: 'emp_1',
@@ -227,7 +227,7 @@ export const seedDatabase = async () => {
 
     try {
       await db.insert(adminUser);
-      console.log('✅ Usuario administrador creado: cfreddystiven / 12345678');
+      console.log('✅ Usuario administrador creado: cfreddystiven@gmail.com / 12345678');
     } catch (error: any) {
       if (error.statusCode === 409) {
         console.log('⚠️ Usuario administrador ya existe');
