@@ -6,6 +6,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import multer from 'multer';
+import path from 'path';
 
 // Importar rutas
 import authRoutes from './routes/auth';
@@ -134,6 +135,14 @@ app.post('/api/send-file-email', upload.single('file'), async (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
+// Servir archivos estáticos del frontend
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+
+// Ruta para SPA (Single Page Application)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+});
+
 // Inicializar servidor
 const startServer = async () => {
   try {
@@ -145,6 +154,7 @@ const startServer = async () => {
       console.log(`🚀 Servidor SIRH Molino corriendo en puerto ${PORT}`);
       console.log(`📊 API disponible en http://localhost:${PORT}/api`);
       console.log(`🏥 Health check en http://localhost:${PORT}/api/health`);
+      console.log(`🌐 Frontend disponible en http://localhost:${PORT}`);
     });
 
   } catch (error) {
