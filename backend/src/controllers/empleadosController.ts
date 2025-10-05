@@ -437,14 +437,27 @@ export const addObservacion = async (req: Request, res: Response) => {
   }
 };
 
-// Exportar empleados a PDF (placeholder)
+// Exportar empleados a PDF
 export const exportEmpleadosPDF = async (req: Request, res: Response) => {
   try {
-    // TODO: Implementar generación de PDF
-    res.status(501).json({
-      success: false,
-      error: 'Funcionalidad de exportación PDF en desarrollo'
+    const { generateEmpleadosPDF } = await import('../services/reportService');
+    
+    // Obtener todos los empleados
+    const result = await db.find({
+      selector: { type: 'empleado' }
     });
+
+    const empleados = result.docs as Empleado[];
+    
+    // Generar PDF
+    const pdfBuffer = generateEmpleadosPDF(empleados);
+    
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=empleados_${new Date().toISOString().split('T')[0]}.pdf`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    res.send(pdfBuffer);
   } catch (error) {
     console.error('Error exportando PDF:', error);
     res.status(500).json({
@@ -454,14 +467,27 @@ export const exportEmpleadosPDF = async (req: Request, res: Response) => {
   }
 };
 
-// Exportar empleados a Excel (placeholder)
+// Exportar empleados a Excel
 export const exportEmpleadosExcel = async (req: Request, res: Response) => {
   try {
-    // TODO: Implementar generación de Excel
-    res.status(501).json({
-      success: false,
-      error: 'Funcionalidad de exportación Excel en desarrollo'
+    const { generateEmpleadosExcel } = await import('../services/reportService');
+    
+    // Obtener todos los empleados
+    const result = await db.find({
+      selector: { type: 'empleado' }
     });
+
+    const empleados = result.docs as Empleado[];
+    
+    // Generar Excel
+    const excelBuffer = generateEmpleadosExcel(empleados);
+    
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=empleados_${new Date().toISOString().split('T')[0]}.xlsx`);
+    res.setHeader('Content-Length', excelBuffer.length);
+    
+    res.send(excelBuffer);
   } catch (error) {
     console.error('Error exportando Excel:', error);
     res.status(500).json({

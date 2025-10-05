@@ -26,6 +26,11 @@ interface EmailOptions {
   subject: string;
   html: string;
   text?: string;
+  attachments?: Array<{
+    filename: string;
+    content: Buffer;
+    contentType: string;
+  }>;
 }
 
 // Función para enviar email
@@ -36,7 +41,8 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
       to: options.to,
       subject: options.subject,
       html: options.html,
-      text: options.text
+      text: options.text,
+      attachments: options.attachments
     };
 
     const info = await transporter.sendMail(mailOptions);

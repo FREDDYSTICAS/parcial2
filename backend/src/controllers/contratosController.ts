@@ -352,14 +352,27 @@ export const getEstadisticasContratos = async (req: Request, res: Response) => {
   }
 };
 
-// Exportar contratos a PDF (placeholder)
+// Exportar contratos a PDF
 export const exportContratosPDF = async (req: Request, res: Response) => {
   try {
-    // TODO: Implementar generación de PDF
-    res.status(501).json({
-      success: false,
-      error: 'Funcionalidad de exportación PDF en desarrollo'
+    const { generateContratosPDF } = await import('../services/reportService');
+    
+    // Obtener todos los contratos
+    const result = await db.find({
+      selector: { type: 'contrato' }
     });
+
+    const contratos = result.docs as Contrato[];
+    
+    // Generar PDF
+    const pdfBuffer = generateContratosPDF(contratos);
+    
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=contratos_${new Date().toISOString().split('T')[0]}.pdf`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    res.send(pdfBuffer);
   } catch (error) {
     console.error('Error exportando PDF:', error);
     res.status(500).json({
@@ -369,14 +382,27 @@ export const exportContratosPDF = async (req: Request, res: Response) => {
   }
 };
 
-// Exportar contratos a Excel (placeholder)
+// Exportar contratos a Excel
 export const exportContratosExcel = async (req: Request, res: Response) => {
   try {
-    // TODO: Implementar generación de Excel
-    res.status(501).json({
-      success: false,
-      error: 'Funcionalidad de exportación Excel en desarrollo'
+    const { generateContratosExcel } = await import('../services/reportService');
+    
+    // Obtener todos los contratos
+    const result = await db.find({
+      selector: { type: 'contrato' }
     });
+
+    const contratos = result.docs as Contrato[];
+    
+    // Generar Excel
+    const excelBuffer = generateContratosExcel(contratos);
+    
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=contratos_${new Date().toISOString().split('T')[0]}.xlsx`);
+    res.setHeader('Content-Length', excelBuffer.length);
+    
+    res.send(excelBuffer);
   } catch (error) {
     console.error('Error exportando Excel:', error);
     res.status(500).json({
