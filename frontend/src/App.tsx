@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext.tsx';
 import { useAuth } from './hooks/useAuth';
 import Layout from './components/Layout/Layout';
-import Login from './pages/Login';
+import LoginV2 from './pages/LoginV2';
 import Dashboard from './pages/Dashboard';
 import Empleados from './pages/Empleados';
 import Contratos from './pages/Contratos';
@@ -42,8 +42,11 @@ const AppContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Cargando sistema...</p>
+        </div>
       </div>
     );
   }
@@ -55,7 +58,7 @@ const AppContent: React.FC = () => {
         <Route 
           path="/login" 
           element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Login />
+            isAuthenticated ? <Navigate to="/" replace /> : <LoginV2 />
           } 
         />
         
