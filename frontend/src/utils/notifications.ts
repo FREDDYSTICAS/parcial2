@@ -48,7 +48,7 @@ export class NotificationManager {
     const notification = document.createElement('div');
     notification.className = `notification notification-${options.type} fade-in`;
     
-    const iconMap = {
+    const iconMap: Record<string, string> = {
       success: '✅',
       error: '❌',
       warning: '⚠️',
@@ -61,12 +61,13 @@ export class NotificationManager {
           <span class="text-lg">${iconMap[options.type]}</span>
         </div>
         <div class="flex-1">
-          <h4 class="text-sm font-medium text-gray-900">${options.title}</h4>
-          <p class="text-sm text-gray-600 mt-1">${options.message}</p>
+          <h4 class="text-sm font-medium text-gray-900">${this.escapeHtml(options.title)}</h4>
+          <p class="text-sm text-gray-600 mt-1">${this.escapeHtml(options.message)}</p>
         </div>
         <button 
-          class="flex-shrink-0 text-gray-400 hover:text-gray-600"
+          class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
           onclick="this.parentElement.parentElement.remove()"
+          aria-label="Cerrar notificación"
         >
           <span class="sr-only">Cerrar</span>
           <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -77,6 +78,12 @@ export class NotificationManager {
     `;
 
     return notification;
+  }
+
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   private removeNotification(notification: HTMLElement): void {
@@ -113,17 +120,19 @@ export class NotificationManager {
 export const notifications = NotificationManager.getInstance();
 
 // Utilidades para manejo de errores de API
-export const handleApiError = (error: any): string => {
-  if ((error as any)?.response?.data?.message) {
-    return (error as any).response.data.message;
+export const handleApiError = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const response = (error as { response?: { data?: { message?: string; error?: string } } }).response;
+    if (response?.data?.message) {
+      return response.data.message;
+    }
+    if (response?.data?.error) {
+      return response.data.error;
+    }
   }
   
-  if ((error as any)?.response?.data?.error) {
-    return (error as any).response.data.error;
-  }
-  
-  if (error.message) {
-    return error.message;
+  if (error && typeof error === 'object' && 'message' in error) {
+    return (error as { message: string }).message;
   }
   
   return 'Ha ocurrido un error inesperado';
