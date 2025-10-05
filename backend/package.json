@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "build:frontend": "cd ../frontend && npm install && npm run build",
-    "build:all": "npm run build && npm run build:frontend",
+    "build:frontend": "cd ../frontend && yarn install && yarn build",
+    "build:all": "yarn build && yarn build:frontend",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
