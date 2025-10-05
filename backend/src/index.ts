@@ -138,9 +138,14 @@ app.use(errorHandler);
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
-// Ruta para SPA (Single Page Application)
+// Ruta para SPA (Single Page Application) - debe ir al final
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  // Solo servir el SPA si no es una ruta de API
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  } else {
+    res.status(404).json({ success: false, error: 'Ruta no encontrada' });
+  }
 });
 
 // Inicializar servidor
