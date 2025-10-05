@@ -44,9 +44,14 @@ const LoginV2: React.FC = () => {
       console.log('✅ Login completado, navegando a dashboard...');
       navigate('/');
       console.log('🎯 Navegación ejecutada');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Error en login:', err);
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+      const errorMessage = err && typeof err === 'object' && 'response' in err && 
+        err.response && typeof err.response === 'object' && 'data' in err.response &&
+        err.response.data && typeof err.response.data === 'object' && 'error' in err.response.data
+        ? (err.response.data as { error: string }).error
+        : 'Error al iniciar sesión';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

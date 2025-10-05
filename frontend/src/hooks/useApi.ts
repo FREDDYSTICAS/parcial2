@@ -5,7 +5,8 @@ import type {
   EmpleadoFormData, 
   ContratoFormData,
   EmpleadoFilters,
-  ContratoFilters 
+  ContratoFilters,
+  Observacion
 } from '../types';
 
 // Hook para empleados
@@ -80,6 +81,23 @@ export const useEmpleadosStats = () => {
     queryKey: ['empleados-stats'],
     queryFn: empleadosService.getEstadisticas,
     staleTime: 10 * 60 * 1000, // 10 minutos
+  });
+};
+
+export const useCreateObservacion = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Omit<Observacion, 'fecha'> }) => 
+      empleadosService.addObservacion(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['empleados'] });
+      queryClient.invalidateQueries({ queryKey: ['empleado', id] });
+      notifications.success('Éxito', 'Observación agregada correctamente');
+    },
+    onError: (error) => {
+      notifications.error('Error', handleApiError(error));
+    },
   });
 };
 

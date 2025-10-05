@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Modal from '../UI/Modal';
 import Button from '../UI/Button';
 import Badge from '../UI/Badge';
+import ObservacionModal from './ObservacionModal';
 import { 
   User, 
   Mail, 
@@ -10,7 +11,8 @@ import {
   X,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
+  Plus
 } from 'lucide-react';
 import { formatDate, formatDateTime } from '../../utils/notifications';
 
@@ -27,6 +29,7 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
   empleado,
   onEdit
 }) => {
+  const [showObservacionModal, setShowObservacionModal] = useState(false);
   if (!empleado) return null;
 
   const getEstadoIcon = (estado: string) => {
@@ -69,13 +72,14 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`${empleado.nombre} ${empleado.apellido}`}
-      size="xl"
-    >
-      <div className="space-y-6">
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={`${empleado.nombre} ${empleado.apellido}`}
+        size="xl"
+      >
+        <div className="space-y-6">
         {/* Información Principal */}
         <div className="bg-gray-50 rounded-lg p-6">
           <div className="flex items-start space-x-4">
@@ -161,12 +165,22 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
         </div>
 
         {/* Observaciones */}
-        {empleado.observaciones && empleado.observaciones.length > 0 && (
-          <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
               <AlertCircle className="h-5 w-5 mr-2 text-amber-600" />
               Observaciones
             </h3>
+            <Button
+              onClick={() => setShowObservacionModal(true)}
+              className="flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 text-sm"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Agregar</span>
+            </Button>
+          </div>
+          
+          {empleado.observaciones && empleado.observaciones.length > 0 ? (
             
             <div className="space-y-3">
               {empleado.observaciones.map((obs: any, index: number) => (
@@ -191,8 +205,14 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <p>No hay observaciones registradas</p>
+              <p className="text-sm">Haz clic en "Agregar" para crear la primera observación</p>
+            </div>
+          )}
+        </div>
 
         {/* Botones */}
         <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
@@ -205,6 +225,14 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
         </div>
       </div>
     </Modal>
+
+    {/* Modal de Observaciones */}
+    <ObservacionModal
+      isOpen={showObservacionModal}
+      onClose={() => setShowObservacionModal(false)}
+      empleado={empleado}
+    />
+    </>
   );
 };
 
