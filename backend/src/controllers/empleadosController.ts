@@ -21,9 +21,15 @@ interface EmpleadoRequest extends Request {
 // Obtener todos los empleados
 export const getEmpleados = async (req: Request, res: Response) => {
   try {
+    console.log('=== OBTENIENDO EMPLEADOS ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('Query params:', req.query);
+    console.log('User:', req.user);
+    
     const { estado, cargo, genero, search, limit = 50, skip = 0 } = req.query;
 
     let selector: any = { type: 'empleado' };
+    console.log('Selector inicial:', selector);
     
     if (estado) {
       selector.estado = estado;
@@ -65,11 +71,18 @@ export const getEmpleados = async (req: Request, res: Response) => {
       });
     }
 
+    console.log('Selector final:', selector);
+    console.log('Ejecutando búsqueda en CouchDB...');
+    
     const result = await db.find({
       selector,
       limit: parseInt(limit as string),
-      skip: parseInt(skip as string),
-      sort: [{ 'nombre': 'asc' }]
+      skip: parseInt(skip as string)
+    });
+
+    console.log('Resultado de CouchDB:', {
+      docs: result.docs.length,
+      warning: result.warning
     });
 
     res.json({
@@ -78,11 +91,17 @@ export const getEmpleados = async (req: Request, res: Response) => {
       total: result.docs.length
     });
 
-  } catch (error) {
-    console.error('Error obteniendo empleados:', error);
+  } catch (error: any) {
+    console.error('❌ Error obteniendo empleados:', error);
+    console.error('Error details:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack
+    });
     res.status(500).json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
+      message: error?.message || 'Error desconocido'
     });
   }
 };

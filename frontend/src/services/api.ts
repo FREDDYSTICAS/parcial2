@@ -94,26 +94,30 @@ export const empleadosService = {
     if (filters?.genero) params.append('genero', filters.genero);
     if (filters?.search) params.append('search', filters.search);
 
+    console.log('📋 Obteniendo empleados con filtros:', filters);
     const response = await api.get(`/empleados?${params.toString()}`);
-    return response.data;
+    console.log('📊 Respuesta de empleados:', response.data);
+    
+    // El backend devuelve { success: true, data: [...] }
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Obtener empleado por ID
   getById: async (id: string): Promise<Empleado> => {
     const response = await api.get(`/empleados/${id}`);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Crear empleado
   create: async (empleado: EmpleadoFormData): Promise<Empleado> => {
     const response = await api.post('/empleados', empleado);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Actualizar empleado
   update: async (id: string, empleado: EmpleadoFormData): Promise<Empleado> => {
     const response = await api.put(`/empleados/${id}`, empleado);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Eliminar empleado
@@ -124,13 +128,13 @@ export const empleadosService = {
   // Agregar observación
   addObservacion: async (id: string, observacion: Omit<Observacion, 'fecha'>): Promise<Empleado> => {
     const response = await api.post(`/empleados/${id}/observaciones`, observacion);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Obtener estadísticas
   getEstadisticas: async (): Promise<EstadisticasEmpleados> => {
     const response = await api.get('/empleados/estadisticas');
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Exportar a PDF
@@ -183,26 +187,29 @@ export const contratosService = {
     if (filters?.tipo_contrato) params.append('tipo_contrato', filters.tipo_contrato);
     if (filters?.empleado_id) params.append('empleado_id', filters.empleado_id);
 
+    console.log('📄 Obteniendo contratos con filtros:', filters);
     const response = await api.get(`/contratos?${params.toString()}`);
-    return response.data;
+    console.log('📊 Respuesta de contratos:', response.data);
+    
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Obtener contrato por ID
   getById: async (id: string): Promise<Contrato> => {
     const response = await api.get(`/contratos/${id}`);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Crear contrato
   create: async (contrato: ContratoFormData): Promise<Contrato> => {
     const response = await api.post('/contratos', contrato);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Actualizar contrato
   update: async (id: string, contrato: ContratoFormData): Promise<Contrato> => {
     const response = await api.put(`/contratos/${id}`, contrato);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Eliminar contrato
@@ -213,13 +220,13 @@ export const contratosService = {
   // Obtener contratos por empleado
   getByEmpleado: async (empleadoId: string): Promise<Contrato[]> => {
     const response = await api.get(`/contratos/empleado/${empleadoId}`);
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Obtener estadísticas
   getEstadisticas: async (): Promise<EstadisticasContratos> => {
     const response = await api.get('/contratos/estadisticas');
-    return response.data;
+    return response.data.success ? response.data.data : response.data;
   },
 
   // Exportar a PDF

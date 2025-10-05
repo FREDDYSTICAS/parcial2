@@ -90,8 +90,8 @@ const startServer = async () => {
       console.log(`📊 API disponible en http://localhost:${PORT}/api`);
       console.log(`🏥 Health check en http://localhost:${PORT}/api/health`);
       console.log(`\n🔐 Credenciales de prueba:`);
-      console.log(`👤 Usuario: admin`);
-      console.log(`🔑 Contraseña: admin123`);
+      console.log(`📧 Email: cfreddystiven@gmail.com`);
+      console.log(`🔑 Contraseña: 12345678`);
       console.log('=== LISTO PARA RECIBIR PETICIONES ===');
     });
   } catch (error: any) {

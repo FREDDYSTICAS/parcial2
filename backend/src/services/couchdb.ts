@@ -102,11 +102,19 @@ const createViews = async () => {
             }
           }`
         },
-        // Vista para usuarios del sistema
+        // Vista para usuarios del sistema por username
         usuarios_sistema: {
           map: `function(doc) {
             if (doc.type === 'usuario') {
               emit(doc.username, doc);
+            }
+          }`
+        },
+        // Vista para usuarios del sistema por email
+        usuarios_por_email: {
+          map: `function(doc) {
+            if (doc.type === 'usuario') {
+              emit(doc.email, doc);
             }
           }`
         },

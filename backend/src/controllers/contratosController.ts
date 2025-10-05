@@ -36,8 +36,7 @@ export const getContratos = async (req: Request, res: Response) => {
     const result = await db.find({
       selector,
       limit: parseInt(limit as string),
-      skip: parseInt(skip as string),
-      sort: [{ 'fecha_inicio': 'desc' }]
+      skip: parseInt(skip as string)
     });
 
     res.json({
