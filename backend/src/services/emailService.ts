@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 // Bandera para deshabilitar correo en entornos sin SMTP
 const EMAIL_DISABLED = (process.env.EMAIL_DISABLED || 'false').toLowerCase() === 'true';
@@ -10,6 +11,10 @@ const SMTP_SECURE = (process.env.SMTP_SECURE || '').toLowerCase() === 'true' || 
 const SMTP_USER = process.env.SMTP_USER || process.env.EMAIL_USER;
 const SMTP_PASS = process.env.SMTP_PASS || process.env.EMAIL_PASS;
 const EMAIL_FROM = process.env.EMAIL_FROM || 'SIRH Molino <noreply@molino.com>';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+// Si hay RESEND_API_KEY, preferimos API HTTP de Resend (evita bloqueos SMTP)
+const resendClient = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 // Crear transporter solo si no está deshabilitado y hay credenciales
 const transporter = !EMAIL_DISABLED && SMTP_USER && SMTP_PASS
@@ -38,8 +43,10 @@ if (transporter && VERIFY_ON_BOOT) {
   });
 } else if (EMAIL_DISABLED) {
   console.log('✳️ Email deshabilitado por EMAIL_DISABLED=true');
+} else if (resendClient) {
+  console.log('📮 Email habilitado vía Resend (API HTTP)');
 } else {
-  console.warn('⚠️ Email no configurado: faltan SMTP_USER/SMTP_PASS. El envío se omitirá.');
+  console.warn('⚠️ Email no configurado: faltan SMTP_USER/SMTP_PASS o RESEND_API_KEY. El envío se omitirá.');
 }
 
 // Interfaz para el email
@@ -58,6 +65,23 @@ interface EmailOptions {
 // Función para enviar email
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
   try {
+    // Enviar por Resend si está configurado
+    if (resendClient) {
+      const result = await resendClient.emails.send({
+        from: EMAIL_FROM,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+        text: options.text,
+        attachments: options.attachments?.map(a => ({
+          filename: a.filename,
+          content: a.content.toString('base64')
+        }))
+      } as any);
+      console.log('📧 Email enviado vía Resend:', (result as any)?.id || 'ok');
+      return;
+    }
+
     if (!transporter) {
       console.log('✳️ Email omitido (deshabilitado o no configurado):', {
         to: options.to,
