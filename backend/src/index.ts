@@ -147,8 +147,8 @@ app.use(errorHandler);
 // Inicializar servidor
 const startServer = async () => {
   try {
-    // Inicializar base de datos
-    const { initializeDatabase } = await import('./services/couchdb');
+    // Inicializar base de datos (Firebase en lugar de CouchDB)
+    const { initializeDatabase } = await import('./services/firebase');
     await initializeDatabase();
 
     app.listen(PORT, () => {

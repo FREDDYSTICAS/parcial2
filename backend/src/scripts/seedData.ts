@@ -9,6 +9,7 @@ const empleadosSeed: Omit<Empleado, '_id' | '_rev'>[] = [
     nro_documento: '12345678',
     nombre: 'Juan',
     apellido: 'Pérez',
+    nombre_apellido: 'Juan Pérez',
     edad: 35,
     genero: 'Masculino',
     cargo: 'Gerente General',
@@ -24,6 +25,7 @@ const empleadosSeed: Omit<Empleado, '_id' | '_rev'>[] = [
     nro_documento: '87654321',
     nombre: 'María',
     apellido: 'González',
+    nombre_apellido: 'María González',
     edad: 28,
     genero: 'Femenino',
     cargo: 'Supervisora de Producción',
@@ -39,6 +41,7 @@ const empleadosSeed: Omit<Empleado, '_id' | '_rev'>[] = [
     nro_documento: '11223344',
     nombre: 'Carlos',
     apellido: 'Rodríguez',
+    nombre_apellido: 'Carlos Rodríguez',
     edad: 42,
     genero: 'Masculino',
     cargo: 'Operador de Molino',
@@ -61,6 +64,7 @@ const empleadosSeed: Omit<Empleado, '_id' | '_rev'>[] = [
     nro_documento: '55667788',
     nombre: 'Ana',
     apellido: 'Martínez',
+    nombre_apellido: 'Ana Martínez',
     edad: 31,
     genero: 'Femenino',
     cargo: 'Contadora',
@@ -76,6 +80,7 @@ const empleadosSeed: Omit<Empleado, '_id' | '_rev'>[] = [
     nro_documento: '99887766',
     nombre: 'Luis',
     apellido: 'Hernández',
+    nombre_apellido: 'Luis Hernández',
     edad: 25,
     genero: 'Masculino',
     cargo: 'Auxiliar Administrativo',
@@ -207,12 +212,12 @@ export const seedDatabase = async () => {
 
     // Crear usuario administrador
     console.log('👤 Creando usuario administrador...');
-    const adminPassword = await bcrypt.hash('admin123', 12);
+    const adminPassword = await bcrypt.hash('12345678', 12);
     const adminUser: Usuario = {
       _id: 'user_admin',
       type: 'usuario',
-      username: 'admin',
-      email: 'admin@molino.com',
+      username: 'cfreddystiven',
+      email: 'cfreddystivengmail.com',
       password_hash: adminPassword,
       rol: 'administrador',
       empleado_id: 'emp_1',
@@ -222,7 +227,7 @@ export const seedDatabase = async () => {
 
     try {
       await db.insert(adminUser);
-      console.log('✅ Usuario administrador creado: admin / admin123');
+      console.log('✅ Usuario administrador creado: cfreddystiven / 12345678');
     } catch (error: any) {
       if (error.statusCode === 409) {
         console.log('⚠️ Usuario administrador ya existe');

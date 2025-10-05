@@ -170,6 +170,7 @@ export const createEmpleado = async (req: EmpleadoRequest, res: Response) => {
       nro_documento,
       nombre,
       apellido,
+      nombre_apellido: `${nombre} ${apellido}`,
       edad,
       genero: genero as 'Masculino' | 'Femenino' | 'Otro',
       cargo,
@@ -238,6 +239,7 @@ export const updateEmpleado = async (req: EmpleadoRequest, res: Response) => {
       ...updateData,
       genero: updateData.genero as 'Masculino' | 'Femenino' | 'Otro' || empleadoExistente.genero,
       estado: updateData.estado as 'activo' | 'inactivo' | 'suspendido' || empleadoExistente.estado,
+      nombre_apellido: `${updateData.nombre ?? empleadoExistente.nombre} ${updateData.apellido ?? empleadoExistente.apellido}`,
       fecha_actualizacion: new Date().toISOString()
     };
 
