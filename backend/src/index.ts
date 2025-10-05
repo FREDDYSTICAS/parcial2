@@ -55,12 +55,34 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    message: 'SIRH Molino de Arroz API',
-    timestamp: new Date().toISOString()
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    const { db } = await import('./services/couchdb');
+    // Verificar Firestore buscando un usuario (o al menos la colección)
+    const result = await db.find({ selector: { type: 'usuario' }, limit: 1 });
+
+    res.json({
+      status: 'OK',
+      message: 'SIRH Molino de Arroz API',
+      timestamp: new Date().toISOString(),
+      database: {
+        provider: 'firebase-firestore',
+        reachable: true,
+        hasUsers: result.docs.length > 0
+      }
+    });
+  } catch (err: any) {
+    res.status(200).json({
+      status: 'DEGRADED',
+      message: 'API responde, base de datos no alcanzable',
+      timestamp: new Date().toISOString(),
+      database: {
+        provider: 'firebase-firestore',
+        reachable: false,
+        error: err?.message
+      }
+    });
+  }
 });
 
 // Rutas de la API
