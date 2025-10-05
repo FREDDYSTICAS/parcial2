@@ -55,9 +55,14 @@ const EmpleadosList: React.FC = () => {
   const handleDownloadPDF = async () => {
     setIsGenerating('pdf');
     try {
+      console.log('🔍 Token en localStorage:', localStorage.getItem('token'));
+      console.log('🔍 Usuario en localStorage:', localStorage.getItem('user'));
+      
       const response = await api.get('/empleados/export/pdf', {
         responseType: 'blob'
       });
+      
+      console.log('✅ Respuesta PDF recibida:', response);
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -68,7 +73,8 @@ const EmpleadosList: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error descargando PDF:', error);
+      console.error('❌ Error descargando PDF:', error);
+      console.error('❌ Detalles del error:', error.response?.data);
     } finally {
       setIsGenerating(null);
     }
@@ -77,9 +83,14 @@ const EmpleadosList: React.FC = () => {
   const handleDownloadExcel = async () => {
     setIsGenerating('excel');
     try {
+      console.log('🔍 Token en localStorage:', localStorage.getItem('token'));
+      console.log('🔍 Usuario en localStorage:', localStorage.getItem('user'));
+      
       const response = await api.get('/empleados/export/excel', {
         responseType: 'blob'
       });
+      
+      console.log('✅ Respuesta Excel recibida:', response);
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -90,7 +101,8 @@ const EmpleadosList: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error descargando Excel:', error);
+      console.error('❌ Error descargando Excel:', error);
+      console.error('❌ Detalles del error:', error.response?.data);
     } finally {
       setIsGenerating(null);
     }

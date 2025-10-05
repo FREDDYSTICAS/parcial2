@@ -440,26 +440,36 @@ export const addObservacion = async (req: Request, res: Response) => {
 // Exportar empleados a PDF
 export const exportEmpleadosPDF = async (req: Request, res: Response) => {
   try {
-    const { generateEmpleadosPDF } = await import('../services/reportService');
+    console.log('=== INICIANDO EXPORTACIÓN PDF ===');
+    console.log('Usuario autenticado:', req.user);
     
-    // Obtener todos los empleados
+    console.log('Importando reportService...');
+    const { generateEmpleadosPDF } = await import('../services/reportService');
+    console.log('✅ reportService importado correctamente');
+    
+    console.log('Obteniendo empleados de la base de datos...');
     const result = await db.find({
       selector: { type: 'empleado' }
     });
+    console.log(`✅ Encontrados ${result.docs.length} empleados`);
 
     const empleados = result.docs as Empleado[];
     
-    // Generar PDF
+    console.log('Generando PDF...');
     const pdfBuffer = generateEmpleadosPDF(empleados);
+    console.log(`✅ PDF generado, tamaño: ${pdfBuffer.length} bytes`);
     
     // Configurar headers para descarga
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=empleados_${new Date().toISOString().split('T')[0]}.pdf`);
     res.setHeader('Content-Length', pdfBuffer.length);
     
+    console.log('Enviando PDF al cliente...');
     res.send(pdfBuffer);
+    console.log('✅ PDF enviado correctamente');
   } catch (error) {
-    console.error('Error exportando PDF:', error);
+    console.error('❌ Error exportando PDF:', error);
+    console.error('Stack trace:', (error as any)?.stack);
     res.status(500).json({
       success: false,
       error: 'Error interno del servidor'

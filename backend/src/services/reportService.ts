@@ -12,47 +12,64 @@ declare module 'jspdf' {
 
 // Generar PDF de empleados
 export const generateEmpleadosPDF = (empleados: Empleado[]): Buffer => {
-  const doc = new jsPDF();
-  
-  // Título
-  doc.setFontSize(20);
-  doc.text('Reporte de Empleados - SIRH Molino', 14, 22);
-  
-  // Fecha de generación
-  doc.setFontSize(10);
-  doc.text(`Generado el: ${new Date().toLocaleDateString('es-CO')}`, 14, 30);
-  
-  // Tabla de empleados
-  const tableData = empleados.map(emp => [
-    emp.nro_documento,
-    `${emp.nombre} ${emp.apellido}`,
-    emp.edad,
-    emp.genero,
-    emp.cargo,
-    emp.correo,
-    emp.nro_contacto,
-    emp.estado.charAt(0).toUpperCase() + emp.estado.slice(1)
-  ]);
+  try {
+    console.log('=== GENERANDO PDF DE EMPLEADOS ===');
+    console.log('Número de empleados:', empleados.length);
+    
+    const doc = new jsPDF();
+    console.log('✅ jsPDF creado');
+    
+    // Título
+    doc.setFontSize(20);
+    doc.text('Reporte de Empleados - SIRH Molino', 14, 22);
+    console.log('✅ Título agregado');
+    
+    // Fecha de generación
+    doc.setFontSize(10);
+    doc.text(`Generado el: ${new Date().toLocaleDateString('es-CO')}`, 14, 30);
+    console.log('✅ Fecha agregada');
+    
+    // Tabla de empleados
+    const tableData = empleados.map(emp => [
+      emp.nro_documento || 'N/A',
+      `${emp.nombre || ''} ${emp.apellido || ''}`,
+      emp.edad || 'N/A',
+      emp.genero || 'N/A',
+      emp.cargo || 'N/A',
+      emp.correo || 'N/A',
+      emp.nro_contacto || 'N/A',
+      (emp.estado || 'N/A').charAt(0).toUpperCase() + (emp.estado || 'N/A').slice(1)
+    ]);
+    console.log('✅ Datos de tabla preparados');
 
-  (doc as any).autoTable({
-    head: [['Documento', 'Nombre', 'Edad', 'Género', 'Cargo', 'Email', 'Contacto', 'Estado']],
-    body: tableData,
-    startY: 35,
-    styles: {
-      fontSize: 8,
-      cellPadding: 3
-    },
-    headStyles: {
-      fillColor: [212, 175, 55], // Color dorado del molino
-      textColor: 255,
-      fontStyle: 'bold'
-    },
-    alternateRowStyles: {
-      fillColor: [245, 245, 245]
-    }
-  });
+    // Usar autoTable de manera más simple
+    (doc as any).autoTable({
+      head: [['Documento', 'Nombre', 'Edad', 'Género', 'Cargo', 'Email', 'Contacto', 'Estado']],
+      body: tableData,
+      startY: 35,
+      styles: {
+        fontSize: 8,
+        cellPadding: 3
+      },
+      headStyles: {
+        fillColor: [212, 175, 55],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      }
+    });
+    console.log('✅ Tabla generada');
 
-  return Buffer.from(doc.output('arraybuffer'));
+    const buffer = Buffer.from(doc.output('arraybuffer'));
+    console.log('✅ Buffer creado, tamaño:', buffer.length);
+    
+    return buffer;
+  } catch (error) {
+    console.error('❌ Error en generateEmpleadosPDF:', error);
+    throw error;
+  }
 };
 
 // Generar PDF de contratos
