@@ -131,22 +131,18 @@ app.post('/api/send-file-email', upload.single('file'), async (req, res) => {
   }
 });
 
-// Middleware de manejo de errores
-app.use(notFound);
-app.use(errorHandler);
-
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
 // Ruta para SPA (Single Page Application) - debe ir al final
-app.get('*', (req, res) => {
-  // Solo servir el SPA si no es una ruta de API
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
-  } else {
-    res.status(404).json({ success: false, error: 'Ruta no encontrada' });
-  }
+// Usar RegExp compatible con Express 5 para evitar errores de path-to-regexp
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 });
+
+// Middleware de manejo de errores (debe ir al final)
+app.use(notFound);
+app.use(errorHandler);
 
 // Inicializar servidor
 const startServer = async () => {

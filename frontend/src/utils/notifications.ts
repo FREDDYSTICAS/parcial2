@@ -10,9 +10,11 @@ export interface NotificationOptions {
 export class NotificationManager {
   private static instance: NotificationManager;
   private container: HTMLElement | null = null;
+  private stylesInjected = false;
 
   private constructor() {
     this.createContainer();
+    this.injectStyles();
   }
 
   public static getInstance(): NotificationManager {
@@ -65,8 +67,7 @@ export class NotificationManager {
           <p class="text-sm text-gray-600 mt-1">${this.escapeHtml(options.message)}</p>
         </div>
         <button 
-          class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-          onclick="this.parentElement.parentElement.remove()"
+          class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors close-btn"
           aria-label="Cerrar notificación"
         >
           <span class="sr-only">Cerrar</span>
@@ -76,6 +77,12 @@ export class NotificationManager {
         </button>
       </div>
     `;
+
+    // Registrar cierre por evento (evita onclick inline)
+    const closeBtn = notification.querySelector('button.close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.removeNotification(notification));
+    }
 
     return notification;
   }
@@ -96,6 +103,39 @@ export class NotificationManager {
         notification.parentNode?.removeChild(notification);
       }, 300);
     }
+  }
+
+  private injectStyles(): void {
+    if (typeof document === 'undefined' || this.stylesInjected) return;
+
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+      #notification-container { pointer-events: none; }
+      #notification-container .notification { 
+        pointer-events: auto; 
+        background: #ffffff; 
+        border: 1px solid rgba(0,0,0,0.08); 
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+        border-radius: 0.5rem; 
+        padding: 0.75rem 1rem; 
+        width: 24rem; 
+      }
+      #notification-container .notification-success { border-left: 4px solid #16a34a; }
+      #notification-container .notification-error { border-left: 4px solid #dc2626; }
+      #notification-container .notification-warning { border-left: 4px solid #d97706; }
+      #notification-container .notification-info { border-left: 4px solid #2563eb; }
+      #notification-container .fade-in { 
+        animation: notification-fade-in 0.2s ease-out; 
+      }
+      @keyframes notification-fade-in {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+    `;
+
+    document.head.appendChild(style);
+    this.stylesInjected = true;
   }
 
   // Métodos de conveniencia
