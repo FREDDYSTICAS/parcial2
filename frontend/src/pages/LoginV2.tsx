@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Building2, Users, FileText } from 'lucide-react';
 import '../styles/login-v2.css';
@@ -57,9 +57,6 @@ const LoginV2: React.FC = () => {
     }
   };
 
-  const handleForgotPassword = () => {
-    alert('Funcionalidad de recuperación de contraseña próximamente disponible');
-  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -193,13 +190,12 @@ const LoginV2: React.FC = () => {
 
                 {/* Enlace de recuperación de contraseña */}
                 <div className="flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
+                  <Link
+                    to="/forgot-password"
                     className="text-sm text-amber-600 hover:text-amber-700 font-medium transition-colors duration-200"
                   >
                     ¿Olvidaste tu contraseña?
-                  </button>
+                  </Link>
                 </div>
 
                 {/* Mensaje de error */}

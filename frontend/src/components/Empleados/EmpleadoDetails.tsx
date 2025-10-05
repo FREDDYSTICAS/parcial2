@@ -1,26 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Modal from '../UI/Modal';
 import Button from '../UI/Button';
 import Badge from '../UI/Badge';
-import ObservacionModal from './ObservacionModal';
 import { 
   User, 
   Mail, 
   Phone, 
   Edit, 
   X,
-  AlertCircle,
   CheckCircle,
   Clock,
-  Plus
+  AlertCircle
 } from 'lucide-react';
-import { formatDate, formatDateTime } from '../../utils/notifications';
+import { formatDate } from '../../utils/notifications';
+import type { Empleado } from '../../types';
 
 interface EmpleadoDetailsProps {
   isOpen: boolean;
   onClose: () => void;
-  empleado: any;
-  onEdit: (empleado: any) => void;
+  empleado: Empleado | null;
+  onEdit: (empleado: Empleado) => void;
 }
 
 const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
@@ -29,7 +28,6 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
   empleado,
   onEdit
 }) => {
-  const [showObservacionModal, setShowObservacionModal] = useState(false);
   if (!empleado) return null;
 
   const getEstadoIcon = (estado: string) => {
@@ -45,41 +43,28 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
     }
   };
 
-  const getObservacionIcon = (tipo: string) => {
-    switch (tipo) {
-      case 'felicitacion':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'llamado_atencion':
-        return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'advertencia':
-        return <X className="h-4 w-4 text-red-600" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const getObservacionColor = (tipo: string) => {
-    switch (tipo) {
-      case 'felicitacion':
+  const getObservacionColor = (estado: string) => {
+    switch (estado) {
+      case 'activo':
         return 'success';
-      case 'llamado_atencion':
-        return 'warning';
-      case 'advertencia':
+      case 'inactivo':
         return 'danger';
+      case 'suspendido':
+        return 'warning';
       default:
         return 'default';
     }
   };
 
+
   return (
-    <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={`${empleado.nombre} ${empleado.apellido}`}
-        size="xl"
-      >
-        <div className="space-y-6">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${empleado.nombre} ${empleado.apellido}`}
+      size="xl"
+    >
+      <div className="space-y-6 max-h-[80vh] overflow-y-auto">
         {/* Información Principal */}
         <div className="bg-gray-50 rounded-lg p-6">
           <div className="flex items-start space-x-4">
@@ -164,55 +149,6 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
           </div>
         </div>
 
-        {/* Observaciones */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2 text-amber-600" />
-              Observaciones
-            </h3>
-            <Button
-              onClick={() => setShowObservacionModal(true)}
-              className="flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 text-sm"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Agregar</span>
-            </Button>
-          </div>
-          
-          {empleado.observaciones && empleado.observaciones.length > 0 ? (
-            
-            <div className="space-y-3">
-              {empleado.observaciones.map((obs: any, index: number) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-start space-x-3">
-                    {getObservacionIcon(obs.tipo)}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Badge variant={getObservacionColor(obs.tipo)} size="sm">
-                          {obs.tipo.replace('_', ' ').charAt(0).toUpperCase() + obs.tipo.replace('_', ' ').slice(1)}
-                        </Badge>
-                        <span className="text-sm text-gray-500">
-                          {formatDateTime(obs.fecha)}
-                        </span>
-                      </div>
-                      <p className="text-gray-900">{obs.descripcion}</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Por: {obs.autor}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>No hay observaciones registradas</p>
-              <p className="text-sm">Haz clic en "Agregar" para crear la primera observación</p>
-            </div>
-          )}
-        </div>
 
         {/* Botones */}
         <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
@@ -225,14 +161,6 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({
         </div>
       </div>
     </Modal>
-
-    {/* Modal de Observaciones */}
-    <ObservacionModal
-      isOpen={showObservacionModal}
-      onClose={() => setShowObservacionModal(false)}
-      empleado={empleado}
-    />
-    </>
   );
 };
 

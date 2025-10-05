@@ -5,6 +5,8 @@ import { AuthProvider } from './contexts/AuthContext.tsx';
 import { useAuth } from './hooks/useAuth';
 import Layout from './components/Layout/Layout';
 import LoginV2 from './pages/LoginV2';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Empleados from './pages/Empleados';
 import Contratos from './pages/Contratos';
@@ -59,6 +61,20 @@ const AppContent: React.FC = () => {
           path="/login" 
           element={
             isAuthenticated ? <Navigate to="/" replace /> : <LoginV2 />
+          } 
+        />
+        
+        <Route 
+          path="/forgot-password" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
+          } 
+        />
+        
+        <Route 
+          path="/reset-password" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <ResetPassword />
           } 
         />
         

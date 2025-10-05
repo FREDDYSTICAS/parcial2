@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,7 +7,10 @@ import Modal from '../UI/Modal';
 import Button from '../UI/Button';
 import Input from '../UI/Input';
 import Select from '../UI/Select';
-import { User, Mail, Phone, Briefcase } from 'lucide-react';
+import Badge from '../UI/Badge';
+import ObservacionModal from './ObservacionModal';
+import { User, Mail, Phone, Briefcase, AlertCircle, Plus, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { formatDateTime } from '../../utils/notifications';
 
 const empleadoSchema = z.object({
   nro_documento: z.string().min(1, 'Número de documento es requerido'),
@@ -37,6 +40,7 @@ const EmpleadoModal: React.FC<EmpleadoModalProps> = ({
   const isEditing = !!empleado;
   const createMutation = useCreateEmpleado();
   const updateMutation = useUpdateEmpleado();
+  const [showObservacionModal, setShowObservacionModal] = useState(false);
 
   const {
     register,
@@ -101,6 +105,33 @@ const EmpleadoModal: React.FC<EmpleadoModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error submitting form:', error);
+    }
+  };
+
+  // Funciones auxiliares para observaciones
+  const getObservacionIcon = (tipo: string) => {
+    switch (tipo) {
+      case 'felicitacion':
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'llamado_atencion':
+        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+      case 'advertencia':
+        return <AlertCircle className="h-5 w-5 text-red-600" />;
+      default:
+        return <Info className="h-5 w-5 text-blue-600" />;
+    }
+  };
+
+  const getObservacionColor = (tipo: string) => {
+    switch (tipo) {
+      case 'felicitacion':
+        return 'success';
+      case 'llamado_atencion':
+        return 'warning';
+      case 'advertencia':
+        return 'danger';
+      default:
+        return 'default';
     }
   };
 
@@ -235,6 +266,61 @@ const EmpleadoModal: React.FC<EmpleadoModalProps> = ({
           </div>
         </div>
 
+        {/* Sección de Observaciones - Solo al editar */}
+        {isEditing && empleado && (
+          <div className="space-y-4 bg-amber-50 rounded-lg p-4 border border-amber-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                <AlertCircle className="h-5 w-5 mr-2 text-amber-600" />
+                Observaciones
+              </h3>
+              <Button
+                type="button"
+                onClick={() => setShowObservacionModal(true)}
+                className="flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-sm font-medium"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Agregar Observación</span>
+              </Button>
+            </div>
+            
+            {empleado.observaciones && empleado.observaciones.length > 0 ? (
+              <div className="space-y-3">
+                {empleado.observaciones.map((obs: any, index: number) => (
+                  <div key={index} className="bg-white rounded-lg p-4 border border-amber-200">
+                    <div className="flex items-start space-x-3">
+                      {getObservacionIcon(obs.tipo)}
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <Badge variant={getObservacionColor(obs.tipo)} size="sm">
+                            {obs.tipo.replace('_', ' ').charAt(0).toUpperCase() + obs.tipo.replace('_', ' ').slice(1)}
+                          </Badge>
+                          <span className="text-sm text-gray-500">
+                            {formatDateTime(obs.fecha)}
+                          </span>
+                        </div>
+                        <p className="text-gray-900">{obs.descripcion}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Por: {obs.autor}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-600 bg-white rounded-lg border-2 border-dashed border-amber-300">
+                <AlertCircle className="h-16 w-16 mx-auto mb-4 text-amber-400" />
+                <p className="text-lg font-medium mb-2">No hay observaciones registradas</p>
+                <p className="text-sm text-gray-500 mb-4">Haz clic en "Agregar Observación" para crear la primera observación</p>
+                <div className="text-xs text-amber-600 bg-amber-100 px-3 py-1 rounded-full inline-block">
+                  💡 Tip: Las observaciones pueden ser llamados de atención, felicitaciones, advertencias, etc.
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Botones */}
         <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
           <Button
@@ -254,6 +340,15 @@ const EmpleadoModal: React.FC<EmpleadoModalProps> = ({
           </Button>
         </div>
       </form>
+
+      {/* Modal de Observaciones */}
+      {isEditing && empleado && (
+        <ObservacionModal
+          isOpen={showObservacionModal}
+          onClose={() => setShowObservacionModal(false)}
+          empleado={empleado}
+        />
+      )}
     </Modal>
   );
 };
