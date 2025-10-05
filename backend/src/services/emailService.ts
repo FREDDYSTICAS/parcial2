@@ -1,24 +1,45 @@
 import nodemailer from 'nodemailer';
 
-// Configurar transporter de email
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// Bandera para deshabilitar correo en entornos sin SMTP
+const EMAIL_DISABLED = (process.env.EMAIL_DISABLED || 'false').toLowerCase() === 'true';
 
-// Verificar configuración de email
-transporter.verify((error: any, success: any) => {
-  if (error) {
-    console.error('❌ Error configurando email:', error);
-  } else {
-    console.log('✅ Servidor de email configurado correctamente');
-  }
-});
+// Compatibilidad con distintas variables de entorno (SMTP_* o EMAIL_*)
+const SMTP_HOST = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || '587');
+const SMTP_SECURE = (process.env.SMTP_SECURE || '').toLowerCase() === 'true' || SMTP_PORT === 465;
+const SMTP_USER = process.env.SMTP_USER || process.env.EMAIL_USER;
+const SMTP_PASS = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+const EMAIL_FROM = process.env.EMAIL_FROM || 'SIRH Molino <noreply@molino.com>';
+
+// Crear transporter solo si no está deshabilitado y hay credenciales
+const transporter = !EMAIL_DISABLED && SMTP_USER && SMTP_PASS
+  ? nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS
+      },
+      connectionTimeout: 10_000,
+      socketTimeout: 10_000
+    })
+  : null;
+
+// Verificar configuración de email si hay transporter
+if (transporter) {
+  transporter.verify((error: any) => {
+    if (error) {
+      console.error('❌ Error configurando email:', error);
+    } else {
+      console.log('✅ Servidor de email configurado correctamente');
+    }
+  });
+} else if (EMAIL_DISABLED) {
+  console.log('✳️ Email deshabilitado por EMAIL_DISABLED=true');
+} else {
+  console.warn('⚠️ Email no configurado: faltan SMTP_USER/SMTP_PASS. El envío se omitirá.');
+}
 
 // Interfaz para el email
 interface EmailOptions {
@@ -36,8 +57,16 @@ interface EmailOptions {
 // Función para enviar email
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
   try {
+    if (!transporter) {
+      console.log('✳️ Email omitido (deshabilitado o no configurado):', {
+        to: options.to,
+        subject: options.subject
+      });
+      return;
+    }
+
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'SIRH Molino <noreply@molino.com>',
+      from: EMAIL_FROM,
       to: options.to,
       subject: options.subject,
       html: options.html,
