@@ -1,4 +1,3 @@
-// Configurar variables de entorno PRIMERO
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -24,11 +23,8 @@ const PORT = process.env.PORT || 3000;
 const storage = multer.memoryStorage();
 const upload = multer({ 
   storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB máximo
-  },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB máximo
   fileFilter: (req, file, cb) => {
-    // Permitir PDF y Excel
     const allowedTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -55,9 +51,18 @@ app.use(cors({
 
 // Middleware para parsing
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rutas
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'SIRH Molino de Arroz API',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Rutas de la API
 app.use('/api/auth', authRoutes);
 app.use('/api/empleados', empleadosRoutes);
 app.use('/api/contratos', contratosRoutes);
@@ -75,15 +80,12 @@ app.post('/api/send-file-email', upload.single('file'), async (req, res) => {
       });
     }
 
-    // Importar servicio de email
     const { sendEmail } = await import('./services/emailService');
 
-    // Determinar el tipo de archivo
     const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
     const isPDF = fileExtension === 'pdf';
     const isExcel = ['xlsx', 'xls'].includes(fileExtension || '');
 
-    // Crear HTML del email
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #D4AF37;">Archivo enviado desde SIRH Molino</h2>
@@ -103,7 +105,6 @@ app.post('/api/send-file-email', upload.single('file'), async (req, res) => {
       </div>
     `;
 
-    // Enviar email con archivo adjunto
     await sendEmail({
       to: email,
       subject: subject || `Archivo SIRH Molino - ${file.originalname}`,
@@ -117,7 +118,7 @@ app.post('/api/send-file-email', upload.single('file'), async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Archivo enviado por email exitosamente'
+      message: 'Archivo enviado correctamente'
     });
 
   } catch (error) {
@@ -129,73 +130,27 @@ app.post('/api/send-file-email', upload.single('file'), async (req, res) => {
   }
 });
 
-// Ruta de salud
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'SIRH Molino de Arroz API',
-    timestamp: new Date().toISOString()
-  });
-});
-
 // Middleware de manejo de errores
 app.use(notFound);
 app.use(errorHandler);
 
-// Inicializar base de datos y servidor
+// Inicializar servidor
 const startServer = async () => {
   try {
-    console.log('=== INICIANDO SERVIDOR SIRH MOLINO ===');
-    console.log('Timestamp:', new Date().toISOString());
-    console.log('Node Environment:', process.env.NODE_ENV || 'development');
-    console.log('Port:', PORT);
-    console.log('Frontend URL:', process.env.FRONTEND_URL || 'http://localhost:5173');
-    
-    // Inicializar CouchDB
-    console.log('🔗 Inicializando conexión a CouchDB...');
+    // Inicializar base de datos
     const { initializeDatabase } = await import('./services/couchdb');
     await initializeDatabase();
-    console.log('✅ CouchDB inicializado correctamente');
-    
-    // Seeding de datos (solo en desarrollo)
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('🌱 Iniciando seeding de datos...');
-      try {
-        const { seedDatabase } = await import('./scripts/seedData');
-        await seedDatabase();
-        console.log('✅ Seeding completado');
-      } catch (error: any) {
-        console.log('⚠️ Error en seeding (continuando):');
-        console.error('- Error:', error);
-        console.error('- Stack:', error.stack);
-      }
-    } else {
-      console.log('🚫 Seeding omitido (modo producción)');
-    }
-    
-    // Iniciar servidor
-    console.log('🚀 Iniciando servidor HTTP...');
+
     app.listen(PORT, () => {
-      console.log('=== SERVIDOR INICIADO EXITOSAMENTE ===');
-      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+      console.log(`🚀 Servidor SIRH Molino corriendo en puerto ${PORT}`);
       console.log(`📊 API disponible en http://localhost:${PORT}/api`);
       console.log(`🏥 Health check en http://localhost:${PORT}/api/health`);
-      console.log(`\n🔐 Credenciales de prueba:`);
-      console.log(`📧 Email: cfreddystiven@gmail.com`);
-      console.log(`🔑 Contraseña: 12345678`);
-      console.log('=== LISTO PARA RECIBIR PETICIONES ===');
     });
-  } catch (error: any) {
-    console.error('💥 ERROR INICIANDO SERVIDOR:');
-    console.error('Tipo de error:', error.constructor.name);
-    console.error('Mensaje:', error.message);
-    console.error('Stack trace:', error.stack);
-    console.error('Error completo:', JSON.stringify(error, null, 2));
-    console.log('=== SERVIDOR FALLÓ AL INICIAR ===');
+
+  } catch (error) {
+    console.error('❌ Error iniciando servidor:', error);
     process.exit(1);
   }
 };
 
 startServer();
-
-export default app;
