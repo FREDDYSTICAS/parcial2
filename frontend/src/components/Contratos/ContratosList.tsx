@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useContratos, useDeleteContrato } from '../../hooks/useApi';
-import { Plus, Eye, Edit, Trash2, FileText } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, FileText, Mail, Table } from 'lucide-react';
 import Button from '../UI/Button';
 import Select from '../UI/Select';
 import Badge from '../UI/Badge';
 import ContratoModal from './ContratoModal';
 import ContratoDetails from './ContratoDetails';
+import EmailModal from '../UI/EmailModal';
+import api from '../../services/api';
 import { formatDate, formatCurrency } from '../../utils/notifications';
 import type { Contrato } from '../../types';
 
@@ -17,8 +19,10 @@ const ContratosList: React.FC = () => {
   });
   const [showModal, setShowModal] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(null);
   const [editingContrato, setEditingContrato] = useState<(Contrato & { _id: string }) | null>(null);
+  const [isGenerating, setIsGenerating] = useState<'pdf' | 'excel' | null>(null);
 
   const { data: contratos, isLoading, error } = useContratos(filters);
   const deleteContratoMutation = useDeleteContrato();
@@ -48,6 +52,50 @@ const ContratosList: React.FC = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingContrato(null);
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsGenerating('pdf');
+    try {
+      const response = await api.get('/contratos/export/pdf', {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `contratos_${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error descargando PDF:', error);
+    } finally {
+      setIsGenerating(null);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    setIsGenerating('excel');
+    try {
+      const response = await api.get('/contratos/export/excel', {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `contratos_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error descargando Excel:', error);
+    } finally {
+      setIsGenerating(null);
+    }
   };
 
   const getEstadoBadge = (estado: string) => {
@@ -109,10 +157,42 @@ const ContratosList: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Contratos</h1>
           <p className="text-gray-600">Gestiona los contratos laborales del molino</p>
         </div>
-        <Button onClick={() => setShowModal(true)} className="mt-4 sm:mt-0">
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Contrato
-        </Button>
+        <div className="flex flex-wrap gap-3 mt-4 sm:mt-0">
+          {/* Botones de reportes */}
+          <Button
+            onClick={handleDownloadPDF}
+            loading={isGenerating === 'pdf'}
+            disabled={isGenerating !== null}
+            className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white"
+          >
+            <FileText className="h-4 w-4" />
+            <span>PDF</span>
+          </Button>
+          
+          <Button
+            onClick={handleDownloadExcel}
+            loading={isGenerating === 'excel'}
+            disabled={isGenerating !== null}
+            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Table className="h-4 w-4" />
+            <span>Excel</span>
+          </Button>
+          
+          <Button
+            onClick={() => setShowEmailModal(true)}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Mail className="h-4 w-4" />
+            <span>Email</span>
+          </Button>
+          
+          {/* Botón Nuevo Contrato */}
+          <Button onClick={() => setShowModal(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Contrato
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -271,6 +351,14 @@ const ContratosList: React.FC = () => {
         onClose={() => setShowDetails(false)}
         contrato={selectedContrato}
         onEdit={handleEdit}
+      />
+      
+      {/* Modal de envío por email */}
+      <EmailModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        fileName="contratos"
+        fileType="pdf"
       />
     </div>
   );

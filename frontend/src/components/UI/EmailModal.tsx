@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Mail, Upload, FileText, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { Mail, FileText, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import Button from './Button';
 import Input from './Input';
 import Modal from './Modal';

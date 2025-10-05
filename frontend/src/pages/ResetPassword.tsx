@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Lock, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
@@ -7,7 +7,6 @@ import api from '../services/api';
 
 const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

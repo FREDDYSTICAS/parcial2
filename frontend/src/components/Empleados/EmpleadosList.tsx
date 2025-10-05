@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useEmpleados, useDeleteEmpleado } from '../../hooks/useApi';
-import { Search, Plus, Eye, Edit, Trash2, User } from 'lucide-react';
+import { Search, Plus, Eye, Edit, Trash2, User, Mail, FileText, Table } from 'lucide-react';
 import Button from '../UI/Button';
 import Input from '../UI/Input';
 import Select from '../UI/Select';
 import Badge from '../UI/Badge';
 import EmpleadoModal from './EmpleadoModal';
 import EmpleadoDetails from './EmpleadoDetails';
+import EmailModal from '../UI/EmailModal';
+import api from '../../services/api';
 import { formatDate } from '../../utils/notifications';
 
 const EmpleadosList: React.FC = () => {
@@ -18,8 +20,10 @@ const EmpleadosList: React.FC = () => {
   });
   const [showModal, setShowModal] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedEmpleado, setSelectedEmpleado] = useState<any>(null);
   const [editingEmpleado, setEditingEmpleado] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState<'pdf' | 'excel' | null>(null);
 
   const { data: empleados, isLoading, error } = useEmpleados(filters);
   const deleteEmpleadoMutation = useDeleteEmpleado();
@@ -45,6 +49,50 @@ const EmpleadosList: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('¿Estás seguro de que quieres marcar este empleado como inactivo?')) {
       await deleteEmpleadoMutation.mutateAsync(id);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsGenerating('pdf');
+    try {
+      const response = await api.get('/empleados/export/pdf', {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `empleados_${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error descargando PDF:', error);
+    } finally {
+      setIsGenerating(null);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    setIsGenerating('excel');
+    try {
+      const response = await api.get('/empleados/export/excel', {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `empleados_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error descargando Excel:', error);
+    } finally {
+      setIsGenerating(null);
     }
   };
 
@@ -101,10 +149,42 @@ const EmpleadosList: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Empleados</h1>
           <p className="text-gray-600">Gestiona la información de los empleados del molino</p>
         </div>
-        <Button onClick={() => setShowModal(true)} className="mt-4 sm:mt-0">
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Empleado
-        </Button>
+        <div className="flex flex-wrap gap-3 mt-4 sm:mt-0">
+          {/* Botones de reportes */}
+          <Button
+            onClick={handleDownloadPDF}
+            loading={isGenerating === 'pdf'}
+            disabled={isGenerating !== null}
+            className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white"
+          >
+            <FileText className="h-4 w-4" />
+            <span>PDF</span>
+          </Button>
+          
+          <Button
+            onClick={handleDownloadExcel}
+            loading={isGenerating === 'excel'}
+            disabled={isGenerating !== null}
+            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Table className="h-4 w-4" />
+            <span>Excel</span>
+          </Button>
+          
+          <Button
+            onClick={() => setShowEmailModal(true)}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Mail className="h-4 w-4" />
+            <span>Email</span>
+          </Button>
+          
+          {/* Botón Nuevo Empleado */}
+          <Button onClick={() => setShowModal(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Empleado
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -263,6 +343,14 @@ const EmpleadosList: React.FC = () => {
         onClose={() => setShowDetails(false)}
         empleado={selectedEmpleado}
         onEdit={handleEdit}
+      />
+      
+      {/* Modal de envío por email */}
+      <EmailModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        fileName="empleados"
+        fileType="pdf"
       />
     </div>
   );
